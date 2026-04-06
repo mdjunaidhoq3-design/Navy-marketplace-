@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navy Marketplace</title>
+<style>
+  body {margin:0;font-family:Arial,sans-serif;background:#fdf6e3;color:#333;}
+  header {background:#bfa74b;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center;}
+  .hamburger {font-size:25px;cursor:pointer;}
+  nav {display:none;flex-direction:column;background:#fff3d1;position:absolute;top:60px;left:0;width:100%;border-top:1px solid #ccc;}
+  nav a {padding:12px;text-decoration:none;color:#333;border-bottom:1px solid #ddd;}
+  nav a:hover {background:#ffeaa0;}
+  main {padding:20px;}
+  .shop-item, .other-item {border:1px solid #ccc;margin-bottom:15px;padding:10px;background:#fff;border-radius:5px;}
+  .shop-item img, .other-item img {max-width:100%;}
+  .reviews {margin-top:30px;background:#fff8dc;padding:10px;border-radius:5px;}
+  .rules {max-height:200px;overflow-y:scroll;padding:10px;background:#fff8dc;border:1px solid #ccc;margin-bottom:15px;}
+  .btn {padding:8px 12px;background:#bfa74b;color:white;border:none;cursor:pointer;margin-top:5px;}
+  .btn:hover {background:#a78d3b;}
+  .hidden {display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Navy Marketplace</h1>
+  <div class="hamburger" onclick="toggleNav()">☰</div>
+</header>
+
+<nav id="navMenu">
+  <a href="#" onclick="showSection('home')">Home</a>
+  <a href="#" onclick="showSection('profile')">Profile</a>
+  <a href="#" onclick="showSection('inbox')">Inbox</a>
+  <a href="#" onclick="showSection('rank')">Ranks</a>
+  <a href="#" onclick="showSection('rules')">Rules</a>
+</nav>
+
+<main>
+  <!-- RULES SECTION -->
+  <section id="rules" class="hidden">
+    <h2>Marketplace Rules</h2>
+    <div class="rules" id="rulesContent">
+      <p>1. Be respectful to all users.</p>
+      <p>2. Only purchase shops if you have enough funds.</p>
+      <p>3. No scamming or fake claims.</p>
+      <p>4. Posts must follow content guidelines; no illegal content.</p>
+      <p>5. Reviews should be honest and constructive.</p>
+      <p>6. Abuse of the system may lead to account restrictions.</p>
+      <p>7. Buying shops increases your posting privileges.</p>
+      <p>8. You can add extra slots to your shop for more items.</p>
+      <p>9. Only Discord login accounts are allowed to post.</p>
+    </div>
+    <button class="btn" onclick="acceptRules()">Accept Rules</button>
+  </section>
+
+  <!-- HOME SECTION -->
+  <section id="home" class="hidden">
+    <h2>Roblox Market</h2>
+    <input type="text" id="searchBox" placeholder="Search items..." oninput="searchItems()">
+    <select id="filter" onchange="filterItems()">
+      <option value="hottest">Hottest</option>
+      <option value="newest">Newest</option>
+      <option value="cheapest">Cheapest</option>
+      <option value="expensive">Expensive</option>
+    </select>
+    <div id="itemsList"></div>
+  </section>
+
+  <!-- PROFILE SECTION -->
+  <section id="profile" class="hidden">
+    <h2>Your Profile</h2>
+    <p>Logged in as <span id="username">Guest</span></p>
+    <a href="https://discord.com/oauth2/authorize?client_id=1490743305955180614&redirect_uri=https%3A%2F%2Fnavy-marketplace.onrender.com%2Fcallback&response_type=code&scope=identify%20email" class="btn">Login with Discord</a>
+    <input type="file" id="profileImage" onchange="uploadImage(event)">
+    <div id="uploadedImages"></div>
+  </section>
+
+  <!-- INBOX SECTION -->
+  <section id="inbox" class="hidden">
+    <h2>Inbox</h2>
+    <div id="messagesList">
+      <p>No messages yet.</p>
+    </div>
+  </section>
+
+  <!-- RANKS SECTION -->
+  <section id="rank" class="hidden">
+    <h2>Ranks & Roles</h2>
+    <div id="rankList">
+      <p>Owners</p>
+      <p>Middleman</p>
+      <p>VIP</p>
+      <p>Premium Sellers</p>
+      <p>Normal Sellers</p>
+      <p>Customers</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+let rulesAccepted = false;
+let navVisible = false;
+
+function toggleNav() {
+  navVisible = !navVisible;
+  document.getElementById('navMenu').style.display = navVisible ? 'flex' : 'none';
+}
+
+function showSection(sectionId) {
+  const sections = ['rules','home','profile','inbox','rank'];
+  sections.forEach(s => document.getElementById(s).classList.add('hidden'));
+  document.getElementById(sectionId).classList.remove('hidden');
+}
+
+// Accept rules
+function acceptRules() {
+  rulesAccepted = true;
+  alert('Rules accepted! You can now use the marketplace.');
+  showSection('home');
+}
+
+// Upload profile images
+function uploadImage(event) {
+  const files = event.target.files;
+  const container = document.getElementById('uploadedImages');
+  for (let i=0;i<files.length;i++){
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(files[i]);
+    img.style.maxWidth = '100px';
+    img.style.margin = '5px';
+    container.appendChild(img);
+  }
+}
+
+// Sample items
+let shopItems = [
+  {name:'Item 1',price:4,seller:'Owner1',img:''},
+  {name:'Item 2',price:8,seller:'Owner2',img:''},
+  {name:'VIP Item',price:15,seller:'Owner1',img:''}
+];
+
+function displayItems() {
+  const container = document.getElementById('itemsList');
+  container.innerHTML='';
+  shopItems.forEach(item=>{
+    const div = document.createElement('div');
+    div.className = 'shop-item';
+    div.innerHTML = `
+      <h3>${item.name}</h3>
+      <p>Price: $${item.price}</p>
+      <p>Seller: ${item.seller}</p>
+      <button class="btn" onclick="buyItem('${item.name}')">${item.seller==='Owner1'?'Add to Cart':'Buy'}</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function buyItem(name){
+  alert('Ticket created with seller for '+name);
+}
+
+function searchItems(){
+  const query = document.getElementById('searchBox').value.toLowerCase();
+  const container = document.getElementById('itemsList');
+  container.innerHTML='';
+  shopItems.filter(i=>i.name.toLowerCase().includes(query)).forEach(item=>{
+    const div = document.createElement('div');
+    div.className='shop-item';
+    div.innerHTML=`<h3>${item.name}</h3><p>Price: $${item.price}</p><p>Seller: ${item.seller}</p><button class="btn">${item.seller==='Owner1'?'Add to Cart':'Buy'}</button>`;
+    container.appendChild(div);
+  });
+}
+
+function filterItems(){
+  const filter = document.getElementById('filter').value;
+  if(filter==='cheapest') shopItems.sort((a,b)=>a.price-b.price);
+  else if(filter==='expensive') shopItems.sort((a,b)=>b.price-a.price);
+  displayItems();
+}
+
+// Initialize
+showSection('rules');
+displayItems();
+</script>
+
+</body>
+</html>
